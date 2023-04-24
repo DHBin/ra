@@ -27,7 +27,7 @@ Flags:
 Use "ra [command] --help" for more information about a command.
 ```
 
-### 数据闪回
+### 数据闪回（解析出回滚SQL）
 
 ```text
 Usage:
