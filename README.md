@@ -2,7 +2,7 @@
 
 ## 使用方法
 
-```
+```text
 数据库工具
 支持binlog数据闪回、binlog转sql等等
 
@@ -50,6 +50,35 @@ Flags:
   -u, --username string         数据库用户名
 ```
 
+例子：
+
+```sql
+SHOW BINLOG EVENTS in 'mysql-bin.000011'
+```
+```text
++----------------+---+--------------+---------+-----------+------------------------------------+
+|Log_name        |Pos|Event_type    |Server_id|End_log_pos|Info                                |
++----------------+---+--------------+---------+-----------+------------------------------------+
+|mysql-bin.000011|4  |Format_desc   |1        |126        |Server ver: 8.0.31, Binlog ver: 4   |
+|mysql-bin.000011|126|Previous_gtids|1        |157        |                                    |
+|mysql-bin.000011|157|Anonymous_Gtid|1        |236        |SET @@SESSION.GTID_NEXT= 'ANONYMOUS'|
+|mysql-bin.000011|236|Query         |1        |315        |BEGIN                               |
+|mysql-bin.000011|315|Table_map     |1        |438        |table_id: 95 (test.tb_type)         |
+|mysql-bin.000011|438|Write_rows    |1        |605        |table_id: 95 flags: STMT_END_F      |
+|mysql-bin.000011|605|Xid           |1        |636        |COMMIT /* xid=97 */                 |
++----------------+---+--------------+---------+-----------+------------------------------------+
+```
+
+运行ra
+
+```shell
+ra flashback --host 127.0.0.1 -u root -p 123456 --start-file mysql-bin.000011 --start-position 4 --stop-position 636
+```
+
+```sql
+delete from `test`.`tb_json` where id = 3 and users = cast('[12,34]' as json) limit 1; # pos 605 timestamp 1682237091
+```
+
 ### binlog转sql
 
 ```text
@@ -72,6 +101,18 @@ Flags:
       --stop-position uint32    终止解析位置。可选。默认为stop-file的最末位置
   -t, --tables strings          只解析目标table的sql，多张表用空格隔开，如-t tbl1 tbl2。可选。默认支持所有表，当database配置为空时，支持跨库重名的表
   -u, --username string         数据库用户名
+```
+
+例子：
+
+```shell
+ra tosql --host 127.0.0.1 -u root -p 123456 --start-file mysql-bin.000011 --start-position 4 --stop-position 636
+```
+
+运行ra
+
+```sql
+insert into `test`.`tb_json` (id, users) values(3, cast('[12,34]' as json)); # pos 605 timestamp 1682237091
 ```
 
 # 感谢
