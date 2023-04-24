@@ -17,7 +17,6 @@
 package sql
 
 import (
-	"errors"
 	"fmt"
 	"github.com/go-mysql-org/go-mysql/schema"
 	"strings"
@@ -82,7 +81,7 @@ func check(table *schema.Table, rows []interface{}, action string) error {
 	colLength := len(table.Columns)
 	rowLength := len(rows)
 	if colLength != rowLength {
-		return errors.New(fmt.Sprintf("字段不一致，跳过生成%s sql cols: %v values: %v", action, table.Columns, rows))
+		return fmt.Errorf("字段不一致，跳过生成%s sql cols: %v values: %v", action, table.Columns, rows)
 	}
 	return nil
 }
