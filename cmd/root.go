@@ -17,9 +17,11 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/dhbin/ra/config"
 	"github.com/siddontang/go-log/log"
 	"os"
+	"runtime"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -71,9 +73,7 @@ func Execute() {
 
 func init() {
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
-	rootCmd.Version = `v1.0.0
-author: @dhbin(https://dhbin.cn)
-github: https://github.com/dhbin/ra`
+	rootCmd.Version = fmt.Sprintf("%s %s %s %s %s", config.Version, runtime.GOOS, runtime.GOARCH, runtime.Version(), config.BuildTime)
 }
 
 func parseBinlogCommonFlags(cmd *cobra.Command) {
