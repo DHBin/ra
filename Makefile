@@ -11,31 +11,20 @@ PLATFORM_LIST = \
 	darwin-amd64 \
 	darwin-amd64-v3 \
 	darwin-arm64 \
-	linux-386 \
 	linux-amd64 \
 	linux-amd64-v3 \
-	linux-armv5 \
-	linux-armv6 \
-	linux-armv7 \
 	linux-arm64 \
-	linux-mips-softfloat \
-	linux-mips-hardfloat \
-	linux-mipsle-softfloat \
-	linux-mipsle-hardfloat \
 	linux-mips64 \
 	linux-mips64le \
 	linux-riscv64 \
-	freebsd-386 \
 	freebsd-amd64 \
 	freebsd-amd64-v3 \
 	freebsd-arm64
 
 WINDOWS_ARCH_LIST = \
-	windows-386 \
 	windows-amd64 \
 	windows-amd64-v3 \
 	windows-arm64 \
-	windows-armv7
 
 all: linux-amd64 darwin-amd64 windows-amd64 # Most used
 
