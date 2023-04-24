@@ -69,11 +69,11 @@ SHOW BINLOG EVENTS in 'mysql-bin.000011'
 +----------------+---+--------------+---------+-----------+------------------------------------+
 ```
 
-运行ra
-
 ```shell
 ra flashback --host 127.0.0.1 -u root -p 123456 --start-file mysql-bin.000011 --start-position 4 --stop-position 636
 ```
+
+输出：
 
 ```sql
 delete from `test`.`tb_json` where id = 3 and users = cast('[12,34]' as json) limit 1; # pos 605 timestamp 1682237091
@@ -109,7 +109,7 @@ Flags:
 ra tosql --host 127.0.0.1 -u root -p 123456 --start-file mysql-bin.000011 --start-position 4 --stop-position 636
 ```
 
-运行ra
+输出：
 
 ```sql
 insert into `test`.`tb_json` (id, users) values(3, cast('[12,34]' as json)); # pos 605 timestamp 1682237091
