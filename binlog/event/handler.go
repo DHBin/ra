@@ -132,7 +132,9 @@ func (h *ToSqlHandler) OnRow(e *canal.RowsEvent) error {
 		if !h.Config.SupportSqlType(canal.InsertAction) {
 			return nil
 		}
-		_, _ = fmt.Fprintf(h.Out, "%s # pos %d timestamp %d\n", sql.BuildInsertSql(e.Table, e.Rows[0]), e.Header.LogPos, e.Header.Timestamp)
+		for _, row := range e.Rows {
+			_, _ = fmt.Fprintf(h.Out, "%s # pos %d timestamp %d\n", sql.BuildInsertSql(e.Table, row), e.Header.LogPos, e.Header.Timestamp)
+		}
 	case canal.UpdateAction:
 		if !h.Config.SupportSqlType(canal.UpdateAction) {
 			return nil
@@ -142,7 +144,9 @@ func (h *ToSqlHandler) OnRow(e *canal.RowsEvent) error {
 		if !h.Config.SupportSqlType(canal.DeleteAction) {
 			return nil
 		}
-		_, _ = fmt.Fprintf(h.Out, "%s # pos %d timestamp %d\n", sql.BuildDeleteSql(e.Table, e.Rows[0]), e.Header.LogPos, e.Header.Timestamp)
+		for _, row := range e.Rows {
+			_, _ = fmt.Fprintf(h.Out, "%s # pos %d timestamp %d\n", sql.BuildDeleteSql(e.Table, row), e.Header.LogPos, e.Header.Timestamp)
+		}
 	}
 	return nil
 }
