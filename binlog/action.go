@@ -17,7 +17,9 @@
 package binlog
 
 import (
+	"fmt"
 	"github.com/dhbin/ra/binlog/event"
+	"github.com/dhbin/ra/binlog/parse"
 	"github.com/dhbin/ra/config"
 	"github.com/go-mysql-org/go-mysql/canal"
 	"github.com/go-mysql-org/go-mysql/mysql"
@@ -75,16 +77,26 @@ func ToSql(config *config.BinlogConfig) error {
 	}
 	handler.Out = out
 
-	c.SetEventHandler(&handler)
 	go func() {
-		// Start canal
-		err = c.RunFrom(mysql.Position{Name: config.StartBinlogName, Pos: config.StartPosition})
-		if err != nil {
+		if config.Local {
+			parser := parse.NewLocalFileParser(config)
+			err := parser.Run(&handler)
 			done <- err
+		} else {
+			// Start canal
+			c.SetEventHandler(&handler)
+			err = c.RunFrom(mysql.Position{Name: config.StartBinlogName, Pos: config.StartPosition})
+			if err != nil {
+				done <- err
+			}
 		}
 	}()
 
-	<-done
+	switch i := (<-done).(type) {
+	case error:
+		fmt.Println(i.Error())
+	default:
+	}
 	c.Close()
 	return nil
 }
@@ -106,16 +118,27 @@ func Flashback(config *config.BinlogConfig) error {
 	}
 	handler.Out = out
 
-	c.SetEventHandler(&handler)
 	go func() {
-		// Start canal
-		err = c.RunFrom(mysql.Position{Name: config.StartBinlogName, Pos: config.StartPosition})
-		if err != nil {
+
+		if config.Local {
+			parser := parse.NewLocalFileParser(config)
+			err := parser.Run(&handler)
 			done <- err
+		} else {
+			c.SetEventHandler(&handler)
+			// Start canal
+			err = c.RunFrom(mysql.Position{Name: config.StartBinlogName, Pos: config.StartPosition})
+			if err != nil {
+				done <- err
+			}
 		}
 	}()
 
-	<-done
+	switch i := (<-done).(type) {
+	case error:
+		fmt.Println(i.Error())
+	default:
+	}
 	c.Close()
 	return nil
 }

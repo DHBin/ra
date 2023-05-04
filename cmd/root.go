@@ -45,7 +45,8 @@ var (
 	sqlTypes []string
 	ddl      bool
 
-	out string
+	out   string
+	local bool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -60,6 +61,17 @@ var rootCmd = &cobra.Command{
 5.6.x
 5.7.x
 8.0.x
+
+binlog转sql例子：
+ra tosql --host 127.0.0.1 -u root -p 123456 --start-file mysql-bin.000001
+
+binlog生成恢复sql例子：
+ra flashback --host 127.0.0.1 -u root -p 123456 --start-file mysql-bin.000001
+
+解析本地binlog例子：
+ra tosql --host 127.0.0.1 -u root -p 123456 --start-file ./mysql-bin.000001 --local
+
+注：解析本地binlog也需要提供数据库信息，用于获取表信息
 `,
 }
 
@@ -85,7 +97,7 @@ func parseBinlogCommonFlags(cmd *cobra.Command) {
 	_ = cmd.MarkPersistentFlagRequired("username")
 	_ = cmd.MarkPersistentFlagRequired("password")
 
-	cmd.PersistentFlags().StringVar(&startBinlogName, "start-file", "", "起始解析文件。必须。只需文件名，无需全路径")
+	cmd.PersistentFlags().StringVar(&startBinlogName, "start-file", "", "起始解析文件。必须。只需文件名，无需全路径，local模式时，该参数为文件路径")
 	cmd.PersistentFlags().StringVar(&stopBinlogName, "stop-file", "", "终止解析文件。可选。默认为start-file同一个文件")
 	cmd.PersistentFlags().Uint32Var(&startPosition, "start-position", 4, "起始解析位置。可选。默认为start-file的起始位置")
 	cmd.PersistentFlags().Uint32Var(&stopPosition, "stop-position", 0, "终止解析位置。可选。默认为stop-file的最末位置")
@@ -98,6 +110,7 @@ func parseBinlogCommonFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringSliceVar(&sqlTypes, "only-type", []string{"insert", "update", "delete"}, "只解析指定类型。支持insert,update,delete。多个类型用逗号隔开，如--sql-type insert,delete。可选。默认为增删改都解析")
 
 	cmd.PersistentFlags().StringVarP(&out, "out", "o", "", "输出sql文件，默认stdout")
+	cmd.PersistentFlags().BoolVar(&local, "local", false, "解析本地binlog文件")
 
 }
 
@@ -118,7 +131,8 @@ func buildBinlogConfig() config.BinlogConfig {
 		SqlTypes: sqlTypes,
 		DDL:      ddl,
 
-		Out: out,
+		Out:   out,
+		Local: local,
 	}
 
 	if binlogConfig.StopBinlogName == "" {
