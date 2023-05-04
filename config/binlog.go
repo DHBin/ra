@@ -41,7 +41,8 @@ type BinlogConfig struct {
 	SqlTypes []string
 	DDL      bool
 
-	Out string
+	Out   string
+	Local bool
 
 	supportSqlTypeMap map[string]bool
 }

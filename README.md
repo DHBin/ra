@@ -12,6 +12,17 @@
 5.7.x
 8.0.x
 
+binlog转sql例子：
+ra tosql --host 127.0.0.1 -u root -p 123456 --start-file mysql-bin.000001
+
+binlog生成恢复sql例子：
+ra flashback --host 127.0.0.1 -u root -p 123456 --start-file mysql-bin.000001
+
+解析本地binlog例子：
+ra tosql --host 127.0.0.1 -u root -p 123456 --start-file ./mysql-bin.000001 --local
+
+注：解析本地binlog也需要提供数据库信息，用于获取表信息
+
 Usage:
   ra [command]
 
@@ -94,7 +105,7 @@ Flags:
   -p, --password string         数据库密码
   -P, --port int                数据库端口 (default 3306)
       --start-datetime string   起始解析时间'。可选。格式'%Y-%m-%d %H:%M:%S。默认不过滤
-      --start-file string       起始解析文件。必须。只需文件名，无需全路径
+      --start-file string       起始解析文件。必须。只需文件名，无需全路径，local模式时，该参数为文件路径
       --start-position uint32   起始解析位置。可选。默认为start-file的起始位置 (default 4)
       --stop-datetime string    终止解析时间。可选。格式'%Y-%m-%d %H:%M:%S'。默认不过滤
       --stop-file string        终止解析文件。可选。默认为start-file同一个文件
