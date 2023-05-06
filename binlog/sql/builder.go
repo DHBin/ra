@@ -47,7 +47,7 @@ func BuildDeleteSql(table *schema.Table, rows []interface{}) string {
 	if err != nil {
 		return err.Error()
 	}
-	conditions := genAssignment(table, rows)
+	conditions := genCondition(table, rows)
 	sqlTemplate := "delete from `%v`.`%v` where %s limit 1;"
 	return fmt.Sprintf(sqlTemplate, table.Schema, table.Name, strings.Join(conditions, " and "))
 }
@@ -64,17 +64,30 @@ func BuildUpdateSql(table *schema.Table, conditionRow []interface{}, row []inter
 	}
 	sqlTemplate := "update `%v`.`%v` set %s where %s limit 1;"
 	setValues := strings.Join(genAssignment(table, row), ", ")
-	conditions := strings.Join(genAssignment(table, conditionRow), " and ")
+	conditions := strings.Join(genCondition(table, conditionRow), " and ")
 	return fmt.Sprintf(sqlTemplate, table.Schema, table.Name, setValues, conditions)
 }
 
 func genAssignment(table *schema.Table, rows []interface{}) []string {
 	colLength := len(table.Columns)
-	conditions := make([]string, colLength)
+	values := make([]string, colLength)
 	for i := range table.Columns {
-		conditions[i] = fmt.Sprintf("%s = %s", table.Columns[i].Name, typeConvertString(&table.Columns[i], rows[i]))
+		values[i] = fmt.Sprintf("`%s` = %s", table.Columns[i].Name, typeConvertString(&table.Columns[i], rows[i]))
 	}
-	return conditions
+	return values
+}
+
+func genCondition(table *schema.Table, rows []interface{}) []string {
+	colLength := len(table.Columns)
+	values := make([]string, colLength)
+	for i := range table.Columns {
+		if rows[i] == nil {
+			values[i] = fmt.Sprintf("`%s` is null", table.Columns[i].Name)
+		} else {
+			values[i] = fmt.Sprintf("`%s` = %s", table.Columns[i].Name, typeConvertString(&table.Columns[i], rows[i]))
+		}
+	}
+	return values
 }
 
 func check(table *schema.Table, rows []interface{}, action string) error {
@@ -91,6 +104,9 @@ func wrapColName(colName string) string {
 }
 
 func typeConvertString(column *schema.TableColumn, val interface{}) string {
+	if val == nil {
+		return "null"
+	}
 	switch column.Type {
 	case schema.TYPE_BIT, schema.TYPE_MEDIUM_INT, schema.TYPE_FLOAT, schema.TYPE_DECIMAL, schema.TYPE_NUMBER:
 		return fmt.Sprintf("%v", val)
