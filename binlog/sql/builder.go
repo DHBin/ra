@@ -18,6 +18,7 @@ package sql
 
 import (
 	"fmt"
+	"github.com/go-mysql-org/go-mysql/mysql"
 	"github.com/go-mysql-org/go-mysql/schema"
 	"strings"
 )
@@ -112,6 +113,15 @@ func typeConvertString(column *schema.TableColumn, val interface{}) string {
 		return fmt.Sprintf("%v", val)
 	case schema.TYPE_JSON:
 		return fmt.Sprintf("cast('%s' as json)", val)
+	case schema.TYPE_STRING:
+		switch t := val.(type) {
+		case string:
+			return fmt.Sprintf("'%s'", mysql.Escape(t))
+		case []uint8:
+			return fmt.Sprintf("'%s'", mysql.Escape(string(t)))
+		default:
+			return fmt.Sprintf("'%v'", t)
+		}
 	default:
 		return fmt.Sprintf("'%v'", val)
 	}
