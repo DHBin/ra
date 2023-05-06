@@ -32,7 +32,7 @@ func BuildInsertSql(table *schema.Table, rows []interface{}) string {
 	colsName := make([]string, colLength)
 	colsVal := make([]string, colLength)
 	for i := range table.Columns {
-		colsName[i] = table.Columns[i].Name
+		colsName[i] = wrapColName(table.Columns[i].Name)
 		colsVal[i] = typeConvertString(&table.Columns[i], rows[i])
 	}
 	cols := strings.Join(colsName, ", ")
@@ -84,6 +84,10 @@ func check(table *schema.Table, rows []interface{}, action string) error {
 		return fmt.Errorf("字段不一致，跳过生成%s sql cols: %v values: %v", action, table.Columns, rows)
 	}
 	return nil
+}
+
+func wrapColName(colName string) string {
+	return "`" + colName + "`"
 }
 
 func typeConvertString(column *schema.TableColumn, val interface{}) string {
